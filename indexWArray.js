@@ -2,7 +2,7 @@
 const express = require("express"); // dependency since no relative file path, import the module and assign it to var
 const app = express();
 
-const profilesObj = require("./dataObject"); // we are in js so no need to add .js 
+// const profilesObj = require("./dataObject"); // we are in js so no need to add .js 
 const profilesArr = require('./dataArray');
 
 const es6Renderer = require("express-es6-template-engine"); // dependency since no relative file path, we import the module and assign it to the var
