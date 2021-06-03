@@ -1,9 +1,13 @@
-
 // 1. initialize express and templates
 const express = require("express");
+const cors = require('cors');
 const es6Renderer = require('express-es6-template-engine');
 
 const app = express();
+
+// when you see app.use - it is middleware, specify static directory
+app.use(cors());
+app.use(express.static('public'));
 
 // Configure Template Engine
 app.engine('html', es6Renderer);
@@ -32,9 +36,9 @@ app.get("/profile/:id", (req, res) => {
 
 // 5. List page here
 app.get("/", (req, res)=>{
-    const profileIds = Object.keys(data)
-    const profilesArray = profileIds.map( id => data[id])
-    console.log(profilesArray)
+    const profileIds = Object.keys(data);
+    const profilesArray = profileIds.map( id => data[id]);
+    // console.log(profilesArray)
 
     res.render('home', {
         locals: {
@@ -51,6 +55,6 @@ app.get("*", (req, res)=>{
 })
 
 // 2. Start your express server
-app.listen(3000, ()=>{
-    console.log("running on port 3000")
+app.listen(3030, ()=>{
+    console.log("running on port 3030")
 })
