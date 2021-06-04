@@ -11,7 +11,7 @@ const app = express();
 // when you see app.use - it is middleware, specify static directory
 app.use(cors());
 app.use(express.static('public'));
-// middleare for body parsing
+// middleware for body parsing
 app.use(express.json());
 // for parsing application/x-www-form-urlencoded (converts str => json)
 // app.use(express.urlencoded({ extended: true })) 
