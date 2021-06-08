@@ -11,7 +11,14 @@
 <body>
   <main class="content">
     <h1 class="header">${title}</h1>
-    <h5 class="text-center"><a href="/signup.html">SIGNUP</a></h5>
+    <h5 class="text-center">
+      <a href="/signup.html">SIGNUP</a> ||
+      <a href="/logout">LOGOUT</a>
+    </h5>
+    <h5 class="text-center">
+      <a href="/ebooks">Top 10 ebooks!</a> ||
+      <a href="/sessiondata">req.session Data from Server</a>
+    </h5>
     <div>
       ${
         profilesArray.map(profile => `
