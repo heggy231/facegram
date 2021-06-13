@@ -16,12 +16,12 @@
       <a href="/logout">LOGOUT</a>
     </h5>
     <h5 class="text-center">
-      <a href="/ebooks">Top 10 ebooks!</a> ||
+      <a href="/kdrama">Top Kdrama!</a> ||
       <a href="/sessiondata">req.session Data from Server</a>
     </h5>
     <div>
       ${
-        profilesArray.map(profile => `
+        profileArray.map(profile => `
           <div class="profile">
             <img class="avatar" src="${profile.avatar}" alt="${profile.name}">
             <h2 class="profile-name">

@@ -167,3 +167,29 @@ https://learn.digitalcrafts.com/flex/lessons/back-end-foundations/express-101/#t
 - https://www.notion.so/samuraijane/8-6abf01a329c3485dae556b65e6d93584
 
 - https://www.notion.so/samuraijane/13-c86915d9d47648a8a73ae3a907fe9d32
+
+### sql
+```sql
+SELECT * FROM profiles;
+SELECT * FROM images;
+
+INSERT INTO profiles (name, email, avatar)
+    VALUES('Gong', 'gong@co.kr', 'https://placeimg.com/128/128/any')
+    RETURNING id; -- {id: 11}
+    
+INSERT INTO profiles (name, email, avatar)
+    VALUES('Teila', 'teila@yahoo.kr', 'https://placeimg.com/128/128/any')
+    RETURNING id; -- {id: 11} 
+
+SELECT * FROM profiles
+	WHERE id = 2; -- returns obj one row data matches id = 2
+
+SELECT * FROM images
+  WHERE profile_id = 4;
+
+INSERT INTO images (profile_id, url)
+    VALUES(6, 'https://placeimg.com/300/300/arch/sepia') RETURNING id;
+
+INSERT INTO images (profile_id, url)
+    VALUES(7, 'https://placeimg.com/300/300/arch/sepia') RETURNING id;
+```
