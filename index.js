@@ -63,7 +63,7 @@ passport.use(
     },
     function(accessToken, refreshToken, profile, cb) {
       // user profile
-      console.log(JSON.stringify(profile));
+      console.log('!!!!!! *******GitHub profile: ====>', JSON.stringify(profile));
 
       // ASIDE: Access Tokens are super important!! Treat them like pwd (never store in plain text)
       // You can use this to talk to Github API
