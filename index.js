@@ -167,7 +167,8 @@ app.get("/profile/:id", ensureAuthenticated, async (req, res) => {
     
     // no result came back for the id, 404 pg doesn't exist
     if (dbRes.length === 0) {
-      res.status(404).send("profile id not found");
+      // res.status(404).send("profile id not found");
+      res.status(404).render('notfound');
       return
     }
 
@@ -200,6 +201,7 @@ app.get("/profile/:id", ensureAuthenticated, async (req, res) => {
   }
   catch (err) {
     res.status(500).send("server error: could not query db");
+    // res.status(500).render('notfound');
   }
 
   res.render("profile", {
