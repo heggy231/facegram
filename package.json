@@ -12,6 +12,7 @@
     "faker": "^5.5.3",
     "passport": "^0.4.1",
     "passport-github": "^1.1.0",
+    "pg-promise": "^10.10.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -19,8 +20,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js",
-    "devArray": "nodemon node indexWArray.js"
+    "dev": "nodemon index.js",
+    "db:create": "createdb facegram",
+    "db:destroy": "dropdb facegram",
+    "db:init": "psql -d facegram < ./db/schema.sql",
+    "db:seed": "node ./db/seed.js",
+    "db:reset": "npm run db:destroy; npm run db:create && npm run db:init && npm run db:seed"
   },
   "author": "",
   "license": "ISC",

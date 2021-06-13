@@ -4,3 +4,5 @@ DB_NAME=facegram
 DB_USER=<fill in Windows only>
 DB_PASS=<fill in Windows only>
 
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

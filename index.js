@@ -8,29 +8,44 @@ const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require("passport-github").Strategy;
+const pgp = require('pg-promise')(); // create pgp instance to get ready for db connection
+
 const app = express();
 
-const data = require('./dataObject')
+// const data = require('./dataObject') // no longer need; since real db to save data
 // console.log(data)
 
+// pg-promise config obj https://github.com/vitaly-t/pg-promise/wiki/connection-syntax
+const cn = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS
+};
+const db = pgp(cn); // faceGram db obj created
+
 // when you see app.use - it is middleware, specify static directory
-app.use(cors());
-app.use(express.static('public'));
+// add express middleware for body parsing when getting req.body also for form urlencoded
+app.use(cors());  // allow cors
+app.use(express.static('public')); // assign static public folder
 // middleware for body parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded (converts str => json)
+app.use(express.json()); // for req.body parsing
+app.use(express.urlencoded({ extended: true })) // for req.body parsing application/x-www-form-urlencoded (converts str => json)
 
 // Configure Template Engine
 app.engine('html', es6Renderer);
 app.set('views', 'templates');
 app.set('view engine', 'html');
 
+
+
 // Place session middleware before passport
 // set cookie expiration maxAge so re-login.
 // secret is key that lets browser know I am the server.
 const sess = {
-    secret: 'keyborad penguin',
-    cookie: {maxAge: 60000}
+  secret: 'keyborad penguin',
+  cookie: {maxAge: 60000}
 };
 app.use(session(sess));
 
@@ -68,13 +83,13 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 passport.serializeUser(function(user, done) {
-    //What goes INTO the session here; right now it's everything in User
-    done(null, user);
+  //What goes INTO the session here; right now it's everything in User
+  done(null, user);
 });
 
 passport.deserializeUser(function(id, done) {
-    done(null, id);
-    //This is looking up the User in the database using the information from the session "id"
+  done(null, id);
+  //This is looking up the User in the database using the information from the session "id"
 });
 
 // process.env.<key>
@@ -82,10 +97,10 @@ console.log('GITHUB_CLIENT_ID: ===>', process.env.GITHUB_CLIENT_ID);
 // result => GITHUB_CLIENT_ID: ===> 6593c4b7e0153e4378b3
 
 function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login.html')
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login.html')
 }
 
 app.get('/auth/github',
@@ -99,6 +114,25 @@ app.get('/auth/github/callback',
     res.redirect('/');
 });
 
+// 6. Post Method to handle new user
+app.post("/profile", ensureAuthenticated, (req, res) => {
+  console.log('full req.body: =====>', req.body);
+
+  // Create ID
+  const id = uuidv4();
+
+  // setting keys
+  req.body.id = id;
+  req.body.images = [];
+  // Save data server memory only exists during server is on
+  data[id] = req.body;
+  console.log('after ___full data transform: ===>', data);
+  console.log('after ___full id transform: ===>', id);
+  console.log('after ___full data[id] transform: ===>', data[id]);
+  console.log('after ___full req.body transform: ===>', req.body);
+  res.status(200).send()
+});
+
 // this route logs you out and redirect to home /
 app.get('/logout', (req, res) => {
     req.logout();
@@ -107,77 +141,57 @@ app.get('/logout', (req, res) => {
 
 // show the req.session data
 app.get('/sessiondata', ensureAuthenticated, (req, res) => {
-    console.log(`
-        You are on session data page req.session
-    `);
-    res.send(`
-        <h1>Session Data (from the server) req.session:</h1>
-        <pre>${JSON.stringify(req.session, null, '\t')}</pre>
-    `);
+  console.log(`
+    You are on session data page req.session
+  `);
+  res.send(`
+    <h1>Session Data (from the server) req.session:</h1>
+    <pre>${JSON.stringify(req.session, null, '\t')}</pre>
+  `);
 });
 
 app.get('/ebooks', ensureAuthenticated, (req, res) => {
-    res.send(`<h1>Heggy's super secret top 10 ebook list</h1>`);
-});
-
-// 6. Post Method to handle new user
-app.post("/profile", ensureAuthenticated, (req, res) => {
-    console.log('full req.body: =====>', req.body);
-
-    // Create ID
-    const id = uuidv4();
-
-    // setting keys
-    req.body.id = id;
-    req.body.images = [];
-    // Save data server memory only exists during server is on
-    data[id] = req.body;
-    console.log('after ___full data transform: ===>', data);
-    console.log('after ___full id transform: ===>', id);
-    console.log('after ___full data[id] transform: ===>', data[id]);
-    console.log('after ___full req.body transform: ===>', req.body);
-    res.status(200).send()
-
+  res.send(`<h1>Heggy's super secret top 10 ebook list</h1>`);
 });
 
 // 4. Detail page here. 
 app.get("/profile/:id", ensureAuthenticated, (req, res) => {
-    const profile = data[req.params.id];
-    // const {id} = req.params  // same as set let id = req.params.id (the value of :id passed into the route)
+  const profile = data[req.params.id];
+  // const {id} = req.params  // same as set let id = req.params.id (the value of :id passed into the route)
 
-    if(!profile){
-        res.status(404).render("notfound");
-    } else {
-      res.render("profile", {
-        locals: {
-            profile,
-            title: 'FaceGram APP'
-        }
-      });
-    }
+  if(!profile){
+    res.status(404).render("notfound");
+  } else {
+    res.render("profile", {
+      locals: {
+        profile,
+        title: 'FaceGram APP'
+      }
+    });
+  }
 })
 
 // 5. List page here
 app.get("/", ensureAuthenticated, (req, res)=>{
-    const profileIds = Object.keys(data);
-    const profilesArray = profileIds.map( id => data[id]);
-    // console.log(profilesArray)
+  const profileIds = Object.keys(data);
+  const profilesArray = profileIds.map( id => data[id]);
+  // console.log(profilesArray)
 
-    res.render('home', {
-        locals: {
-            profilesArray,
-            title: 'FaceGram APP',
-            path: req.path
-        }
-    })
+  res.render('home', {
+    locals: {
+      profilesArray,
+      title: 'FaceGram APP',
+      path: req.path
+    }
+  })
 })
 
 // 3. Write out a route to test your server is working
 app.get("*", (req, res)=>{
-    res.send("catch all")
+  res.send("catch all")
 })
 
 // 2. Start your express server
 app.listen(3030, ()=>{
-    console.log("running on port http://localhost:3030")
+  console.log("running on port http://localhost:3030")
 })
