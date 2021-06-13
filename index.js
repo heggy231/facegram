@@ -115,22 +115,40 @@ app.get('/auth/github/callback',
 });
 
 // 6. Post Method to handle new user
-app.post("/profile", ensureAuthenticated, (req, res) => {
+app.post("/profile", ensureAuthenticated, async (req, res) => {
   console.log('full req.body: =====>', req.body);
+  /**
+   * req.body is what I put in my form or postman = {
+      name: 'Kang',
+      email: 'Dog@gmail.com',
+      avatar: 'https://placeimg.com/128/128/arch/sepia'
+    }
+  */
 
-  // Create ID
-  const id = uuidv4();
+  // grab form data, req.body
+  const profile = req.body;
 
-  // setting keys
-  req.body.id = id;
-  req.body.images = [];
-  // Save data server memory only exists during server is on
-  data[id] = req.body;
-  console.log('after ___full data transform: ===>', data);
-  console.log('after ___full id transform: ===>', id);
-  console.log('after ___full data[id] transform: ===>', data[id]);
-  console.log('after ___full req.body transform: ===>', req.body);
-  res.status(200).send()
+  try {
+    let dbRes = await db.one(`
+    INSERT INTO profiles (name, email, avatar)
+    VALUES ($1, $2, $3) RETURNING id;`,
+    [profile.name, profile.email, profile.avatar]);
+
+    profile.id = dbRes.id;
+    console.log("$$$$$$ newly profile: ====>", JSON.stringify(profile));
+    /**
+     * profile obj => {
+     * "name":"Kang",
+     * "email":"Dog@gmail.com",
+     * "avatar":"https://placeimg.com/128/128/arch/sepia",
+     * "id":7
+     * }
+     */
+    res.status(200).send(profile);
+  }
+  catch (err) {
+    res.status(500).send("server error creating profile");
+  }
 });
 
 // this route logs you out and redirect to home /
